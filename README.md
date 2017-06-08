@@ -48,3 +48,10 @@ $response = new Response(sprintf('Hello %s', htmlspecialchars($input, ENT_QUOTES
 
 $response->send();
 ```
+#### Front Controller
+What happens when we want to add a new page? We're going to start having repeated code that we'll need to separate. For that we create a single point of entry: a front controller.
+
+*Exposing a single PHP script to the end user is a design pattern called the 'front controller'.*
+
+
+
