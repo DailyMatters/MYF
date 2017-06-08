@@ -89,6 +89,17 @@ $response->setContent(sprintf('Hello %s', htmlspecialchars($input, ENT_QUOTES, '
 Using the in built PHP server just as earlier we can acess the following url's:
 
 http://127.0.0.1:4321/front.php/hello?name=Claudio
+
 http://127.0.0.1:4321/front.php/bye
 
+#### Routing
 
+One very important aspect of any website is the form of its URLs. Thanks to the URL map, we have decoupled the URL from the code that generates the associated response, but it is not yet flexible enough. For instance, we might want to support dynamic paths to allow embedding data directly into the URL (e.g. /hello/Claudio) instead of relying on a query string (e.g. /hello?name=Claudio).
+
+To support this feature, add the Symfony Routing component as a dependency:
+
+```bash
+composer require symfony/routing
+```
+
+**Routing: Maps an HTTP request to a set of of configuration variables.**
