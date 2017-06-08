@@ -151,3 +151,8 @@ $routes->add('bye', new Routing\Route('/bye'));
 
 return $routes;
 ```
+
+Sources:
+https://www.sitepoint.com/build-php-framework-symfony-components/
+
+https://symfony.com/doc/current/create_framework/routing.html
