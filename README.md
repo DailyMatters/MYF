@@ -407,6 +407,12 @@ That's it! Our application has now four different layers and each of them has a 
     **src/Calendar:** Our application specific code (the controllers and the model);
     **src/app.php:** The application configuration/framework customization.
 
+#### Unit testing
+The next step is all about adding unit testing to the framework using phpunit. Nothing new here, check the code if you want to have an idea. Move along ;)
+
+
+
+
 Sources:
 https://www.sitepoint.com/build-php-framework-symfony-components/
 
