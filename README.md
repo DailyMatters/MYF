@@ -402,10 +402,10 @@ After this, create the `src/Calendar/Controller/LeapYearController.php` and `src
  
 That's it! Our application has now four different layers and each of them has a well defined goal:
 
-    **web/front.php:** The front controller; the only exposed PHP code that makes the interface with the client (it gets the Request and sends the Response) and provides the boiler-plate code to initialize the framework and our application;
-    **src/Simplex:** The reusable framework code that abstracts the handling of incoming Requests (by the way, it makes your controllers/templates easily testable -- more about that later on);
-    **src/Calendar:** Our application specific code (the controllers and the model);
-    **src/app.php:** The application configuration/framework customization.
+**web/front.php:** The front controller; the only exposed PHP code that makes the interface with the client (it gets the Request and sends the Response) and provides the boiler-plate code to initialize the framework and our application;
+**src/Simplex:** The reusable framework code that abstracts the handling of incoming Requests (by the way, it makes your controllers/templates easily testable -- more about that later on);
+**src/Calendar:** Our application specific code (the controllers and the model);
+**src/app.php:** The application configuration/framework customization.
 
 #### Unit testing
 The next step is all about adding unit testing to the framework using phpunit. Nothing new here, check the code if you want to have an idea. Move along ;)
