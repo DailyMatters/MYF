@@ -414,7 +414,17 @@ That's it! Our application has now four different layers and each of them has a 
 The next step is all about adding unit testing to the framework using phpunit. Nothing new here, check the code if you want to have an idea. Move along ;)
 
 
+#### The Event Dispatcher component
 
+Our framework is still missing a major characteristic of any good framework: extensibility. Being extensible means that the developer should be able to easily hook into the framework life cycle to modify the way the request is handled.
+
+What kind of hooks are we talking about? Authentication or caching for instance. To be flexible, hooks must be plug-and-play; the ones you "register" for an application are different from the next one depending on your specific needs.
+
+As there is no standard for PHP, we are going to use a well-known design pattern, the Mediator, to allow any kind of behaviors to be attached to our framework; the Symfony EventDispatcher Component implements a lightweight version of this pattern:
+
+ `composer require symfony/event-dispatcher`
+
+How does it work? The dispatcher, the central object of the event dispatcher system, notifies listeners of an event dispatched to it. Put another way: your code dispatches an event to the dispatcher, the dispatcher notifies all registered listeners for the event, and each listener do whatever it wants with the event.
 
 Sources:
 https://www.sitepoint.com/build-php-framework-symfony-components/
