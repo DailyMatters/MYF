@@ -225,6 +225,97 @@ $routes->add('leap_year', new Routing\Route('/is_leap_year/{year}', array(
 
 return $routes;
 ```
+#### The HTTPKernel component
+
+Right now, all our examples use procedural code, but remember that controllers can be any valid PHP callbacks. Let's convert our controller to a proper class:
+
+```php
+class LeapYearController
+{
+    public function indexAction($request)
+    {
+        if (is_leap_year($request->attributes->get('year'))) {
+            return new Response('Yep, this is a leap year!');
+        }
+
+        return new Response('Nope, this is not a leap year.');
+    }
+}
+```
+And of course, we need to update the route definition:
+
+```php
+$routes->add('leap_year', new Routing\Route('/is_leap_year/{year}', array(
+    'year' => null,
+    '_controller' => array(new LeapYearController(), 'indexAction'),
+)));
+```
+
+The move is pretty straightforward and makes a lot of sense as soon as you create more pages but you might have noticed a non-desirable side-effect... The LeapYearController class is always instantiated, even if the requested URL does not match the leap_year route. This is bad for one main reason: performance wise, all controllers for all routes must now be instantiated for every request. It would be better if controllers were lazy-loaded so that only the controller associated with the matched route is instantiated.
+
+To solve this issue, and a bunch more, let's install and use the HttpKernel component:
+
+ `composer require symfony/http-kernel`
+
+The HttpKernel component has many interesting features, but the ones we need right now are the controller resolver and argument resolver. A controller resolver knows how to determine the controller to execute and the argument resolver determines the arguments to pass to it, based on a Request object. 
+
+With this, we can just inject the `$year` request attribute for our controller:
+
+```php
+class LeapYearController
+{
+    public function indexAction($year)
+    {
+        if (is_leap_year($year)) {
+            return new Response('Yep, this is a leap year!');
+        }
+
+        return new Response('Nope, this is not a leap year.');
+    }
+}
+```
+And we have the newest version of our framework:
+
+```php
+require_once __DIR__.'/../vendor/autoload.php';
+
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing;
+use Symfony\Component\HttpKernel;
+
+function render_template(Request $request)
+{
+    extract($request->attributes->all(), EXTR_SKIP);
+    ob_start();
+    include sprintf(__DIR__.'/../src/pages/%s.php', $_route);
+
+    return new Response(ob_get_clean());
+}
+
+$request = Request::createFromGlobals();
+$routes = include __DIR__.'/../src/app.php';
+
+$context = new Routing\RequestContext();
+$context->fromRequest($request);
+$matcher = new Routing\Matcher\UrlMatcher($routes, $context);
+
+$controllerResolver = new HttpKernel\Controller\ControllerResolver();
+$argumentResolver = new HttpKernel\Controller\ArgumentResolver();
+
+try {
+    $request->attributes->add($matcher->match($request->getPathInfo()));
+
+    $controller = $controllerResolver->getController($request);
+    $arguments = $argumentResolver->getArguments($request, $controller);
+
+    $response = call_user_func_array($controller, $arguments);
+} catch (Routing\Exception\ResourceNotFoundException $e) {
+    $response = new Response('Not Found', 404);
+} catch (Exception $e) {
+    $response = new Response('An error occurred', 500);
+}
+```
 
 Sources:
 https://www.sitepoint.com/build-php-framework-symfony-components/
