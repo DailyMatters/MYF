@@ -88,9 +88,11 @@ $response->setContent(sprintf('Hello %s', htmlspecialchars($input, ENT_QUOTES, '
 
 Using the in built PHP server just as earlier we can acess the following url's:
 
-http://127.0.0.1:4321/front.php/hello?name=Claudio
+`127.0.0.1:4321 -t web/ web/indexphp`
 
-http://127.0.0.1:4321/front.php/bye
+127.0.0.1:4321/front.php/hello?name=Claudio
+
+127.0.0.1:4321/front.php/bye
 
 #### Routing
 
@@ -148,6 +150,78 @@ use Symfony\Component\Routing;
 $routes = new Routing\RouteCollection();
 $routes->add('hello', new Routing\Route('/hello/{name}', array('name' => 'World')));
 $routes->add('bye', new Routing\Route('/bye'));
+
+return $routes;
+```
+
+#### Templating
+
+Our framework hardcodes the way specific "code" (the templates) is run. For simple pages like the ones we have created so far, that's not a problem, but if you want to add more logic, you would be forced to put the logic into the template itself, which is probably not a good idea, especially if you still have the separation of concerns principle in mind.
+
+Let's separate the template code from the logic by adding a new layer: **the controller: The controller's mission is to generate a Response based on the information conveyed by the client's Request.**
+
+Here's our updated version:
+
+```php
+require_once __DIR__.'/../vendor/autoload.php';
+
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing;
+
+function render_template($request)
+{
+    extract($request->attributes->all(), EXTR_SKIP);
+    ob_start();
+    include sprintf(__DIR__.'/../src/pages/%s.php', $_route);
+
+    return new Response(ob_get_clean());
+}
+
+$request = Request::createFromGlobals();
+$routes = include __DIR__.'/../src/app.php';
+
+$context = new Routing\RequestContext();
+$context->fromRequest($request);
+$matcher = new Routing\Matcher\UrlMatcher($routes, $context);
+
+try {
+    $request->attributes->add($matcher->match($request->getPathInfo()));
+    $response = call_user_func($request->attributes->get('_controller'), $request);
+} catch (Routing\Exception\ResourceNotFoundException $e) {
+    $response = new Response('Not Found', 404);
+} catch (Exception $e) {
+    $response = new Response('An error occurred', 500);
+}
+
+$response->send();
+```
+
+At this point we can create a new application, just by modifying our `app.php` file. That's what we will do, create a new application, just by modifying this single file.
+
+```php
+use Symfony\Component\Routing;
+use Symfony\Component\HttpFoundation\Response;
+
+function is_leap_year($year = null) {
+    if (null === $year) {
+        $year = date('Y');
+    }
+
+    return 0 === $year % 400 || (0 === $year % 4 && 0 !== $year % 100);
+}
+
+$routes = new Routing\RouteCollection();
+$routes->add('leap_year', new Routing\Route('/is_leap_year/{year}', array(
+    'year' => null,
+    '_controller' => function ($request) {
+        if (is_leap_year($request->attributes->get('year'))) {
+            return new Response('Yep, this is a leap year!');
+        }
+
+        return new Response('Nope, this is not a leap year.');
+    }
+)));
 
 return $routes;
 ```
