@@ -88,7 +88,7 @@ $response->setContent(sprintf('Hello %s', htmlspecialchars($input, ENT_QUOTES, '
 
 Using the in built PHP server just as earlier we can acess the following url's:
 
-`127.0.0.1:4321 -t web/ web/indexphp`
+`php -S 127.0.0.1:4321 -t web/ web/index.php`
 
 127.0.0.1:4321/front.php/hello?name=Claudio
 
