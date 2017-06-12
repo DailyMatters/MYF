@@ -450,6 +450,66 @@ class Framework implements HttpKernelInterface
 }
 ```
 
+This simple change brings us a lot of benefits. One of the most impressive ones is *transparent HTTP caching support*.
+
+The HttpCache class implements a fully-featured reverse proxy, written in PHP; it implements HttpKernelInterface and wraps another HttpKernelInterface instance:
+
+```php
+// example.com/web/front.php
+$framework = new Simplex\Framework($dispatcher, $matcher, $resolver);
+$framework = new HttpKernel\HttpCache\HttpCache(
+    $framework,
+    new HttpKernel\HttpCache\Store(__DIR__.'/../cache')
+);
+
+$framework->handle($request)->send();
+```
+
+That's all it takes to add HTTP caching support to our framework. 
+
+Configuring the cache needs to be done via HTTP cache headers. For instance, to cache a response for 10 seconds, use the Response::setTtl() method:
+
+```php
+// ...
+public function indexAction(Request $request, $year)
+{
+    $leapyear = new LeapYear();
+    if ($leapyear->isLeapYear($year)) {
+        $response = new Response('Yep, this is a leap year!');
+    } else {
+        $response = new Response('Nope, this is not a leap year.');
+    }
+
+    $response->setTtl(10);
+
+    return $response;
+}
+```
+Using HTTP cache headers to manage your application cache is very powerful and allows you to tune finely your caching strategy as you can use both the expiration and the validation models of the HTTP specification. If you are not comfortable with these concepts, read the HTTP caching chapter of the Symfony documentation.
+
+The Response class contains many other methods that let you configure the HTTP cache very easily. One of the most powerful is setCache() as it abstracts the most frequently used caching strategies into one simple array:
+
+```php
+$date = date_create_from_format('Y-m-d H:i:s', '2005-10-15 10:00:00');
+
+$response->setCache(array(
+    'public'        => true,
+    'etag'          => 'abcde',
+    'last_modified' => $date,
+    'max_age'       => 10,
+    's_maxage'      => 10,
+));
+
+// it is equivalent to the following code
+$response->setPublic();
+$response->setEtag('abcde');
+$response->setLastModified($date);
+$response->setMaxAge(10);
+$response->setSharedMaxAge(10);
+```
+
+
+
 Sources:
 https://www.sitepoint.com/build-php-framework-symfony-components/
 

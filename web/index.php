@@ -37,6 +37,9 @@ $dispatcher->addListener('response', function (Simplex\ResponseEvent $event) {
 });
 
 $framework = new Simplex\Framework($dispatcher, $matcher, $controllerResolver, $argumentResolver);
-$response = $framework->handle($request);
+$framework = new HttpKernel\HttpCache\HttpCache(
+					$framework,
+					new HttpKernel\HttpCache\Store('./../cache'));
 
-$response->send();
+$response = $framework->handle($request)->send();
+
