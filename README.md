@@ -88,7 +88,7 @@ $response->setContent(sprintf('Hello %s', htmlspecialchars($input, ENT_QUOTES, '
 
 Using the in built PHP server just as earlier we can acess the following url's:
 
-`php -S 127.0.0.1:4321 -t web/ web/index.php`
+`127.0.0.1:4321 -t web/ web/indexphp`
 
 127.0.0.1:4321/front.php/hello?name=Claudio
 
@@ -425,6 +425,30 @@ As there is no standard for PHP, we are going to use a well-known design pattern
  `composer require symfony/event-dispatcher`
 
 How does it work? The dispatcher, the central object of the event dispatcher system, notifies listeners of an event dispatched to it. Put another way: your code dispatches an event to the dispatcher, the dispatcher notifies all registered listeners for the event, and each listener do whatever it wants with the event.
+
+#### HttpKernel Component: HttpKernelInterface
+
+One of the main goals of this development is to achieve interoperability between frameworks and applications using Symfony components. A big step towards this goal is to make our framewirk implement HttpKernelInterface. HttpKernelInterface is probably the most important piece of code in the HttpKernel component, no kidding. Frameworks and applications that implement this interface are fully interoperable. 
+
+Let's update our framework to implement it:
+
+```php
+// ...
+use Symfony\Component\HttpKernel\HttpKernelInterface;
+
+class Framework implements HttpKernelInterface
+{
+    // ...
+
+    public function handle(
+        Request $request,
+        $type = HttpKernelInterface::MASTER_REQUEST,
+        $catch = true
+    ) {
+        // ...
+    }
+}
+```
 
 Sources:
 https://www.sitepoint.com/build-php-framework-symfony-components/

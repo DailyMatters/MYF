@@ -21,8 +21,10 @@ $controllerResolver = new ControllerResolver();
 $argumentResolver = new ArgumentResolver();
 
 $dispatcher = new EventDispatcher();
+$dispatcher->addSubscriber(new Simplex\GoogleListener());
 $dispatcher->addListener('response', function (Simplex\ResponseEvent $event) {
-    $response = $event->getResponse();
+
+	$response = $event->getResponse();
 
     if ($response->isRedirection()
         || ($response->headers->has('Content-Type') && false === strpos($response->headers->get('Content-Type'), 'html'))
