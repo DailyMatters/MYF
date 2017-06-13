@@ -508,9 +508,16 @@ $response->setMaxAge(10);
 $response->setSharedMaxAge(10);
 ```
 
+#### HTTPKernel Component: The HTTPKernel class
 
+If you were to use our framework right now, you would probably have to add support for custom error messages. We do have 404 and 500 error support but the responses are hardcoded in the framework itself. Making them customizable is easy enough though: dispatch a new event and listen to it. Doing it right means that the listener has to call a regular controller.
+
+Enter the HttpKernel class. Instead of solving the same problem over and over again and instead of reinventing the wheel each time, the HttpKernel class is a generic, extensible and flexible implementation of HttpKernelInterface.
+
+This class is very similar to the framework class we have written so far: it dispatches events at some strategic points during the handling of the request, it uses a controller resolver to choose the controller to dispatch the request to, and as an added bonus, it takes care of edge cases and provides great feedback when a problem arises.
 
 Sources:
+
 https://www.sitepoint.com/build-php-framework-symfony-components/
 
 https://symfony.com/doc/current/create_framework/routing.html
