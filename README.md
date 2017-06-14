@@ -88,7 +88,7 @@ $response->setContent(sprintf('Hello %s', htmlspecialchars($input, ENT_QUOTES, '
 
 Using the in built PHP server just as earlier we can acess the following url's:
 
-`127.0.0.1:4321 -t web/ web/indexphp`
+`php -S 127.0.0.1:4321 -t web/ web/index.php`
 
 127.0.0.1:4321/front.php/hello?name=Claudio
 
@@ -107,7 +107,7 @@ composer require symfony/routing
 **Routing: Maps an HTTP request to a set of of configuration variables.**
 
 ```php
-// example.com/web/front.php
+// example.com/web/index.php
 require_once __DIR__.'/../vendor/autoload.php';
 
 use Symfony\Component\HttpFoundation\Request;
@@ -515,6 +515,123 @@ If you were to use our framework right now, you would probably have to add suppo
 Enter the HttpKernel class. Instead of solving the same problem over and over again and instead of reinventing the wheel each time, the HttpKernel class is a generic, extensible and flexible implementation of HttpKernelInterface.
 
 This class is very similar to the framework class we have written so far: it dispatches events at some strategic points during the handling of the request, it uses a controller resolver to choose the controller to dispatch the request to, and as an added bonus, it takes care of edge cases and provides great feedback when a problem arises.
+
+Let's update our framework:
+
+```php
+// example.com/src/Simplex/Framework.php
+namespace Simplex;
+
+use Symfony\Component\HttpKernel\HttpKernel;
+
+class Framework extends HttpKernel
+{
+}
+```
+
+And front controller:
+
+```php
+// example.com/web/index.php
+require_once __DIR__.'/../vendor/autoload.php';
+
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel;
+use Symfony\Component\Routing;
+
+$request = Request::createFromGlobals();
+$requestStack = new RequestStack();
+$routes = include __DIR__.'/../src/app.php';
+
+$context = new Routing\RequestContext();
+$matcher = new Routing\Matcher\UrlMatcher($routes, $context);
+
+$controllerResolver = new HttpKernel\Controller\ControllerResolver();
+$argumentResolver = new HttpKernel\Controller\ArgumentResolver();
+
+$dispatcher = new EventDispatcher();
+$dispatcher->addSubscriber(new HttpKernel\EventListener\RouterListener($matcher, $requestStack));
+
+$framework = new Simplex\Framework($dispatcher, $controllerResolver, $requestStack, $argumentResolver);
+
+$response = $framework->handle($request);
+$response->send();
+```
+
+RouterListener is an implementation of the same logic we had in our framework: it matches the incoming request and populates the request attributes with route parameters.
+
+Our code is now much more concise and surprisingly more robust and more powerful than ever. For instance, use the built-in ExceptionListener to make your error management configurable:
+
+```php
+$errorHandler = function (Symfony\Component\Debug\Exception\FlattenException $exception) {
+    $msg = 'Something went wrong! ('.$exception->getMessage().')';
+
+    return new Response($msg, $exception->getStatusCode());
+};
+$dispatcher->addSubscriber(new HttpKernel\EventListener\ExceptionListener($errorHandler));
+```
+
+ExceptionListener gives you a FlattenException instance instead of the thrown Exception instance to ease exception manipulation and display. It can take any valid controller as an exception handler, so you can create an ErrorController class instead of using a Closure:
+
+```php
+$listener = new HttpKernel\EventListener\ExceptionListener(
+    'Calendar\Controller\ErrorController::exceptionAction'
+);
+$dispatcher->addSubscriber($listener);
+```
+
+The error controller reads as follows:
+
+```php
+// example.com/src/Calendar/Controller/ErrorController.php
+namespace Calendar\Controller;
+
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Debug\Exception\FlattenException;
+
+class ErrorController
+{
+    public function exceptionAction(FlattenException $exception)
+    {
+        $msg = 'Something went wrong! ('.$exception->getMessage().')';
+
+        return new Response($msg, $exception->getStatusCode());
+    }
+}
+```
+
+Voilá!
+
+Updating the listener:
+
+```php
+namespace Calendar\Controller;
+
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Calendar\Model\LeapYear;
+
+class LeapYearController
+{
+    public function indexAction(Request $request, $year)
+    {
+		$leapyear = new LeapYear();
+        if ($leapyear->isLeapYear($year)) {
+            $msg = 'Yep, this is a leap year!';
+			return new Response($msg);
+        }
+        $msg = 'Nope, this is not a leap year.';
+		return new Response($msg);
+    }
+}
+```
+
+#### The dependency injection component
+
+
 
 Sources:
 
