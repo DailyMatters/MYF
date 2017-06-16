@@ -43,8 +43,11 @@ php -S 127.0.0.1:4321 -t web/ web/index.php
 
 In your command line.
 
+The following endpoints are available for testing:
+
 `http://127.0.0.1:4321/hello/{name}`
 
 `http://127.0.0.1:4321/is_leap_year/{year}`
 
-Are the endpoints available for testing.
+
+While the basics are enough to get a REST API working, more dependencies might be needed for extra functionality.
