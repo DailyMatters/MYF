@@ -1,4 +1,4 @@
-## Simplex
+## Barebones
 
 Simple PHP framework using Symfony components. Just the barebones needed to create a REST API. Because Symfony at is core is composed of separate libraries called *components* which can be reused in any PHP application, we can use those same components to create a custom framework.
 
@@ -34,3 +34,17 @@ These are the main dependencies in this framework, which take us to the followin
 ## Usage
 
 Usage of this framework is pretty straight forward and you can find two examples of it on the `src/Hello` and `src/Calendar` folders.  It works just like every other MVC framework, especially like Symfony (can you guess why?)
+
+To run this project you can use the inbuilt PHP server by running:
+
+```bash
+php -S 127.0.0.1:4321 -t web/ web/index.php
+```
+
+In your command line.
+
+`http://127.0.0.1:4321/hello/{name}`
+
+`http://127.0.0.1:4321/is_leap_year/{year}`
+
+Are the endpoints available for testing.

@@ -1,9 +1,9 @@
 <?php
 
-namespace Simplex\Tests;
+namespace Barebones\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Simplex\Framework;
+use Barebones\Framework;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ArgumentResolverInterface;
 use Symfony\Component\HttpKernel\Controller\ControllerResolverInterface;

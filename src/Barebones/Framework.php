@@ -1,6 +1,6 @@
 <?php
 
-namespace Simplex;
+namespace Barebones;
 
 use Symfony\Component\HttpKernel\HttpKernel;
 
