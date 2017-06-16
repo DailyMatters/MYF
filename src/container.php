@@ -6,7 +6,7 @@ use Symfony\Component\HttpFoundation;
 use Symfony\Component\HttpKernel;
 use Symfony\Component\Routing;
 use Symfony\Component\EventDispatcher;
-use Simplex\Framework;
+use Barebones\Framework;
 
 $sc = new DependencyInjection\ContainerBuilder();
 $sc->register('context', Routing\RequestContext::class);

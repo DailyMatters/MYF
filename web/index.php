@@ -4,7 +4,7 @@
 require_once './vendor/autoload.php';
 
 use Symfony\Component\HttpFoundation\Request;
-use Simplex\StringResponseListener;
+use Barebones\StringResponseListener;
 
 $routes = include './src/app.php';
 $sc = include './src/container.php';
