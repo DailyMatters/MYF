@@ -631,10 +631,106 @@ class LeapYearController
 
 #### The dependency injection component
 
+Moving code from the front controller to the framework class makes our framework more configurable, but at the same time, it introduces a lot of issues:
 
+- We are not able to register custom listeners anymore as the dispatcher is not available outside the Framework class (an easy workaround could be the adding of a Framework::getEventDispatcher() method);
+
+- We have lost the flexibility we had before; you cannot change the implementation of the UrlMatcher or of the ControllerResolver anymore;
+
+- Related to the previous point, we cannot test our framework easily anymore as it's impossible to mock internal objects;
+
+- We cannot change the charset passed to ResponseListener anymore (a workaround could be to pass it as a constructor argument).
+
+The previous code did not exhibit the same issues because we used dependency injection; all dependencies of our objects were injected into their constructors (for instance, the event dispatchers were injected into the framework so that we had total control of its creation and configuration).
+
+Does it mean that we have to make a choice between flexibility, customization, ease of testing and not to copy and paste the same code into each application front controller? As you might expect, there is a solution. We can solve all these issues and some more by using the Symfony dependency injection container:
+
+`composer require symony/dependency-injection`
+
+Create a new file to host the dependency injection container configuration:
+
+```php
+// example.com/src/container.php
+use Symfony\Component\DependencyInjection;
+use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\HttpFoundation;
+use Symfony\Component\HttpKernel;
+use Symfony\Component\Routing;
+use Symfony\Component\EventDispatcher;
+use Simplex\Framework;
+
+$sc = new DependencyInjection\ContainerBuilder();
+$sc->register('context', Routing\RequestContext::class);
+$sc->register('matcher', Routing\Matcher\UrlMatcher::class)
+    ->setArguments(array($routes, new Reference('context')))
+;
+$sc->register('request_stack', HttpFoundation\RequestStack::class);
+$sc->register('controller_resolver', HttpKernel\Controller\ControllerResolver::class);
+$sc->register('argument_resolver', HttpKernel\Controller\ArgumentResolver::class);
+
+$sc->register('listener.router', HttpKernel\EventListener\RouterListener::class)
+    ->setArguments(array(new Reference('matcher'), new Reference('request_stack')))
+;
+
+$sc->register('listener.response', HttpKernel\EventListener\ResponseListener::class)
+    ->setArguments(array('UTF-8'))
+;
+$sc->register('listener.exception', HttpKernel\EventListener\ExceptionListener::class)
+    ->setArguments(array('Calendar\Controller\ErrorController::exceptionAction'))
+;
+$sc->register('dispatcher', EventDispatcher\EventDispatcher::class)
+    ->addMethodCall('addSubscriber', array(new Reference('listener.router')))
+    ->addMethodCall('addSubscriber', array(new Reference('listener.response')))
+    ->addMethodCall('addSubscriber', array(new Reference('listener.exception')))
+;
+$sc->register('framework', Framework::class)
+    ->setArguments(array(
+        new Reference('dispatcher'),
+        new Reference('controller_resolver'),
+        new Reference('request_stack'),
+        new Reference('argument_resolver'),
+    ))
+;
+
+return $sc;
+```
+
+The goal of this file is to configure your objects and their dependencies. Nothing is instantiated during this configuration step. This is purely a static description of the objects you need to manipulate and how to create them. Objects will be created on-demand when you access them from the container or when the container needs them to create other objects.
+
+For instance, to create the router listener, we tell Symfony that its class name is Symfony\Component\HttpKernel\EventListener\RouterListener and that its constructor takes a matcher object (new Reference('matcher')). As you can see, each object is referenced by a name, a string that uniquely identifies each object. The name allows us to get an object and to reference it in other object definitions.
+
+The front controller is now only about wiring everything together:
+
+```php
+// example.com/web/front.php
+require_once __DIR__.'/../vendor/autoload.php';
+
+use Symfony\Component\HttpFoundation\Request;
+
+$routes = include __DIR__.'/../src/app.php';
+$sc = include __DIR__.'/../src/container.php';
+
+$request = Request::createFromGlobals();
+
+$response = $sc->get('framework')->handle($request);
+
+$response->send();
+```
+
+As all the objects are now created in the dependency injection container, the framework code should be the previous simple version:
+
+```php
+// example.com/src/Simplex/Framework.php
+namespace Simplex;
+
+use Symfony\Component\HttpKernel\HttpKernel;
+
+class Framework extends HttpKernel
+{
+}
+```
+
+We have obviously barely scratched the surface of what you can do with the container: from class names as parameters, to overriding existing object definitions, from shared service support to dumping a container to a plain PHP class, and much more. The Symfony dependency injection container is really powerful and is able to manage any kind of PHP class.
 
 Sources:
-
-https://www.sitepoint.com/build-php-framework-symfony-components/
-
 https://symfony.com/doc/current/create_framework/routing.html
