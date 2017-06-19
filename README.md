@@ -25,7 +25,8 @@ These are the main dependencies in this framework, which take us to the followin
         "symfony/routing": "^3.3",
         "symfony/http-kernel": "^3.3",
 	"symfony/event-dispatcher": "^3.3",
-        "symfony/dependency-injection": "^3.3"
+        "symfony/dependency-injection": "^3.3",
+	"php" : ">=5.6"
     },
     "autoload": {
         "psr-4": { "": "src/" }
