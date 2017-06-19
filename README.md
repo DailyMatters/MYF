@@ -1,3 +1,5 @@
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/DailyMatters/MYF/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/DailyMatters/MYF/?branch=master)
+
 ## Barebones
 
 Simple PHP framework using Symfony components. Just the barebones needed to create a REST API. Because Symfony at is core is composed of separate libraries called *components* which can be reused in any PHP application, we can use those same components to create a custom framework.
