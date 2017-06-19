@@ -8,7 +8,7 @@ use Calendar\Model\LeapYear;
 
 class LeapYearController
 {
-    public function indexAction(Request $request, $year)
+    public function indexAction($year)
     {
         $leapyear = new LeapYear();
         if ($leapyear->isLeapYear($year)) {
