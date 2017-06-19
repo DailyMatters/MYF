@@ -323,10 +323,10 @@ One down-side of our framework right now is that we need to copy and paste the c
 
 If you have a closer look at the code, front.php has one input, the Request and one output, the Response. Our framework class will follow this simple principle: the logic is about creating the Response associated with a Request.
 
-Let's create our very own namespace for our framework: Simplex. Move the request handling logic into its own Simplex\\Framework class:
+Let's create our very own namespace for our framework: Barebones. Move the request handling logic into its own Barebones\\Framework class:
 
 ```php
-namespace Simplex;
+namespace Barebones;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -380,13 +380,13 @@ $matcher = new Routing\Matcher\UrlMatcher($routes, $context);
 $controllerResolver = new ControllerResolver();
 $argumentResolver = new ArgumentResolver();
 
-$framework = new Simplex\Framework($matcher, $controllerResolver, $argumentResolver);
+$framework = new Barebones\Framework($matcher, $controllerResolver, $argumentResolver);
 $response = $framework->handle($request);
 
 $response->send();
 ```
 
-For the classes defined under the Simplex and Calendar namespaces to be autoloaded, update the composer.json file:
+For the classes defined under the Barebones and Calendar namespaces to be autoloaded, update the composer.json file:
 
 ```json
 {
@@ -404,7 +404,7 @@ That's it! Our application has now four different layers and each of them has a 
 
 **web/front.php:** The front controller; the only exposed PHP code that makes the interface with the client (it gets the Request and sends the Response) and provides the boiler-plate code to initialize the framework and our application;
 
-**src/Simplex:** The reusable framework code that abstracts the handling of incoming Requests (by the way, it makes your controllers/templates easily testable -- more about that later on);
+**src/Barebones:** The reusable framework code that abstracts the handling of incoming Requests (by the way, it makes your controllers/templates easily testable -- more about that later on);
 
 **src/Calendar:** Our application specific code (the controllers and the model);
 
@@ -456,7 +456,7 @@ The HttpCache class implements a fully-featured reverse proxy, written in PHP; i
 
 ```php
 // example.com/web/front.php
-$framework = new Simplex\Framework($dispatcher, $matcher, $resolver);
+$framework = new Barebones\Framework($dispatcher, $matcher, $resolver);
 $framework = new HttpKernel\HttpCache\HttpCache(
     $framework,
     new HttpKernel\HttpCache\Store(__DIR__.'/../cache')
@@ -519,8 +519,8 @@ This class is very similar to the framework class we have written so far: it dis
 Let's update our framework:
 
 ```php
-// example.com/src/Simplex/Framework.php
-namespace Simplex;
+// example.com/src/Barebones/Framework.php
+namespace Barebones;
 
 use Symfony\Component\HttpKernel\HttpKernel;
 
@@ -555,7 +555,7 @@ $argumentResolver = new HttpKernel\Controller\ArgumentResolver();
 $dispatcher = new EventDispatcher();
 $dispatcher->addSubscriber(new HttpKernel\EventListener\RouterListener($matcher, $requestStack));
 
-$framework = new Simplex\Framework($dispatcher, $controllerResolver, $requestStack, $argumentResolver);
+$framework = new Barebones\Framework($dispatcher, $controllerResolver, $requestStack, $argumentResolver);
 
 $response = $framework->handle($request);
 $response->send();
@@ -657,7 +657,7 @@ use Symfony\Component\HttpFoundation;
 use Symfony\Component\HttpKernel;
 use Symfony\Component\Routing;
 use Symfony\Component\EventDispatcher;
-use Simplex\Framework;
+use Barebones\Framework;
 
 $sc = new DependencyInjection\ContainerBuilder();
 $sc->register('context', Routing\RequestContext::class);
@@ -720,8 +720,8 @@ $response->send();
 As all the objects are now created in the dependency injection container, the framework code should be the previous simple version:
 
 ```php
-// example.com/src/Simplex/Framework.php
-namespace Simplex;
+// example.com/src/Barebones/Framework.php
+namespace Barebones;
 
 use Symfony\Component\HttpKernel\HttpKernel;
 
