@@ -25,7 +25,7 @@ These are the main dependencies in this framework, which take us to the followin
 	"symfony/event-dispatcher": "^3.3",
         "symfony/dependency-injection": "^3.3"
     },
-	"autoload": {
+    "autoload": {
         "psr-4": { "": "src/" }
     }
 }
