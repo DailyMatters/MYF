@@ -10,8 +10,8 @@ class HelloController
     public function indexAction(Request $request, $name)
     {
         if (is_null($name)) {
-			return new Response('Hello unnamed person!');
+            return new Response('Hello unnamed person!');
         }
-		return new Response('Hello ' . $name . '!');
+        return new Response('Hello ' . $name . '!');
     }
 }
