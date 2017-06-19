@@ -22,7 +22,7 @@ These are the main dependencies in this framework, which take us to the followin
         "symfony/http-foundation": "^3.3",
         "symfony/routing": "^3.3",
         "symfony/http-kernel": "^3.3",
-		"symfony/event-dispatcher": "^3.3",
+	"symfony/event-dispatcher": "^3.3",
         "symfony/dependency-injection": "^3.3"
     },
 	"autoload": {
